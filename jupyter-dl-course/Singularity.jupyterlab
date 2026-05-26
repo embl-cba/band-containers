@@ -1,0 +1,35 @@
+BootStrap: docker
+From: ubuntu:20.04
+
+
+%startscript
+ jupyter lab --allow-root --NotebookApp.token=''
+%runscript
+ jupyter lab --allow-root --NotebookApp.token=''
+
+%post
+  apt update -y
+  apt install -y wget python3-pip python3-dev
+
+  DEBIAN_FRONTEND=noninteractive apt install -y curl libcurl4-openssl-dev libssl-dev firefox
+  pip3 install ipykernel
+  pip3 install ipython 
+  python3 -m ipykernel install --user
+
+
+  cd /tmp
+  curl -sL https://deb.nodesource.com/setup_14.x | bash -
+
+  DEBIAN_FRONTEND=noninteractive apt install -y nodejs
+ 
+  pip3 install jupyter jupyterlab==2.3.1
+     
+  pip3 install imageio
+  pip3 install jupyter
+  pip3 install scikit-image
+  pip3 install scikit-learn
+  pip3 install tensorboard
+  pip3 install tqdm
+  
+  pip3 install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html 
+

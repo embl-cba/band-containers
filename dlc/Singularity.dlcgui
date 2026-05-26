@@ -1,0 +1,28 @@
+Bootstrap: docker
+From: continuumio/miniconda3
+
+%files
+    
+
+%runscript
+
+%environment
+    CONDA_BIN_PATH="/opt/conda/bin"
+    export PATH="$CONDA_BIN_PATH:$PATH"
+
+%post
+   apt-get update -y
+
+   apt install -y build-essential \
+         python3-pip
+
+   export PATH="/opt/conda/bin:$PATH"
+   conda install mamba -n base -c conda-forge
+   mamba create -n dlc python=3.8 ipython jupyter nb_conda ffmpeg cudatoolkit=11.2 cudnn==8.1.0 -c conda-forge
+   /opt/conda/envs/dlc/bin/pip install 'deeplabcut[gui,tf,modelzoo]'
+
+  
+
+
+# singularity exec --nv CONTAINER_PATH /opt/conda/envs/dlc/bin/python3 -m deeplabcut   
+

@@ -1,0 +1,30 @@
+Bootstrap: docker
+From: continuumio/miniconda3
+
+%files
+    
+
+%runscript
+ exec  /opt/conda/envs/cellpose/bin/"$@"
+
+%environment
+#    export NUMBA_CACHE_DIR=/tmp/numba_cache
+    CONDA_BIN_PATH="/opt/conda/bin"
+    export PATH="$CONDA_BIN_PATH:$PATH"
+
+%post
+   apt-get update -y
+
+   apt install -y build-essential qtcreator libxcb-cursor0 
+
+   export PATH="/opt/conda/bin:$PATH"
+   
+   conda create --name cellpose python=3.10
+   /opt/conda/envs/cellpose/bin/pip install cellpose[gui] torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu116 
+
+   
+  
+
+
+   
+

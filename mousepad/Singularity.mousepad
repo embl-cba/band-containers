@@ -1,0 +1,15 @@
+BootStrap: docker
+From: ubuntu:20.04
+
+%environment
+
+
+%runscript
+   kwrite
+
+%post
+   apt -y update
+
+   apt install mousepad -y
+
+   

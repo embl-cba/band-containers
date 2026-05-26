@@ -1,0 +1,22 @@
+BootStrap: docker
+From: ubuntu:20.04
+
+
+%runscript
+  /opt/xnat-desktop/XNAT-Desktop-Client-3.2.4.AppImage --appimage-extract-and-run
+
+%post
+
+  apt-get -y update
+  apt install -y unzip wget openjdk-8-jre libgtk-3-0
+
+
+  mkdir -p /opt/java/linux-x64/jre/lib/amd64
+
+  ln -s /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server /opt/java/linux-x64/jre/lib/amd64/server
+
+  mkdir /opt/xnat-desktop
+
+  wget -P /opt/xnat-desktop  https://www.bitbucket.org/xnatdev/xnat-desktop-client/downloads/XNAT-Desktop-Client-3.2.4.AppImage
+
+  chmod +x /opt/xnat-desktop/XNAT-Desktop-Client-3.2.4.AppImage

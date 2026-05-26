@@ -1,0 +1,20 @@
+BootStrap: docker
+From: ubuntu:20.04
+
+%startscript
+
+
+%runscript
+  /opt/knime/knime_4.7.4/knime 
+
+%environment
+
+%post
+  apt update -y
+  apt-get install -y software-properties-common wget locales default-jre libswt-gtk-4-jni libswt-gtk-4-java libgbm-dev
+
+  locale-gen en_AU.UTF-8 
+  mkdir /opt/knime
+  cd /opt/knime
+  wget --no-check-certificate https://download.knime.org/analytics-platform/linux/knime_4.7.4.linux.gtk.x86_64.tar.gz
+  tar -xvzf /opt/knime/knime_4.7.4.linux.gtk.x86_64.tar.gz

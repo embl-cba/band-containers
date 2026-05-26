@@ -1,0 +1,23 @@
+BootStrap: docker
+From: ubuntu:22.04
+
+%runscript 
+
+  /usr/bin/libreoffice
+
+
+%startscript
+
+%post
+
+  # Get dependencies
+  apt-get -y update
+
+  apt-get install -y software-properties-common
+
+  add-apt-repository ppa:libreoffice/ppa
+
+  apt-get -y update
+  apt-get install -y libreoffice
+
+   

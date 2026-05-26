@@ -1,0 +1,44 @@
+BootStrap: docker
+From: registry.git.embl.de/grp-cbbcs/abcdesktop-apps/base-image:ubuntu22-cudnn8-cuda-11-7
+
+
+%startscript
+  jupyter lab --KernelSpecManager.ensure_native_kernel=False --allow-root --NotebookApp.token='' 
+
+%runscript
+  jupyter lab --KernelSpecManager.ensure_native_kernel=False --allow-root --NotebookApp.token=''
+  
+%environment
+  
+ export PATH="/opt/conda/bin:/usr/local/cuda/bin:${PATH}"
+
+%post
+  apt update -y
+
+  apt-get install --no-install-recommends --yes build-essential python3.9 python3-pip python-is-python3 curl libcurl4-openssl-dev libssl-dev software-properties-common wget libarchive-dev git openssh-client telnet netcat sshcommand sshfs ftp-ssl wput tftp ncftp git git-ftp ftp dbus-x11 libcanberra-gtk-module libcanberra-gtk3-module konsole 
+ 
+ add-apt-repository -y ppa:mozillateam/ppa
+ apt install -y firefox-esr 
+
+ pip3 install ipykernel ipython jupyterlab jupyterlab-nvdashboard cifar2png
+
+ cd /tmp
+ wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh 
+
+ bash Miniforge3-Linux-x86_64.sh -b -p /opt/conda 
+ rm -f Miniforge3-Linux-x86_64.sh 
+ /opt/conda/bin/conda install mamba -n base -c conda-forge
+
+ /opt/conda/bin/mamba create --name pytorch --yes python=3.11 aicsimageio wandb napari nb_conda pyqt -c conda-forge
+ /opt/conda/envs/pytorch/bin/pip install torch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 --index-url https://download.pytorch.org/whl/cu121 
+ /opt/conda/envs/pytorch/bin/pip install numpy pandas scikit-learn scikit-image bioimageio.core tifffile tqdm imageio ipykernel matplotlib tqdm tensorboard
+ /opt/conda/envs/pytorch/bin/python -m ipykernel install --name pytorch --display-name="DL-Pytorch2.5.1+cuda12.1"
+
+ 
+
+
+
+
+
+
+ 

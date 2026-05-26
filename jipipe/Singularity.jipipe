@@ -1,0 +1,40 @@
+BootStrap: docker
+From: ubuntu:22.04
+
+%environment
+    export FIJIPATH=/opt/fiji/Fiji.app
+    export JIPIPE_USER_DIR=$HOME/.jipipe
+    export PATH=$FIJIPATH:$PATH
+    export DEBIAN_FRONTEND=noninteractive
+    export _JAVA_OPTIONS="-Djava.io.tmpdir=$HOME/tmp -Dij2.plugin.dirs=/opt/fiji/Fiji/jars:/opt/fiji/Fiji/plugins:$HOME/.plugins -Dorg.apache.logging.log4j.simplelog.StatusLogger.level=OFF"
+
+
+%runscript
+   /opt/JIPipe-5.3.0/jipipe.sh
+
+%post
+   export DEBIAN_FRONTEND=noninteractive
+   apt -y update
+   apt install -y --no-install-recommends unzip wget build-essential git software-properties-common python3-pip libxi6 libxrender1 libxtst6 libfreetype6 fonts-dejavu nvidia-opencl-dev ocl-icd-opencl-dev locales \
+   && apt-get clean \
+   && rm -rf /var/lib/apt/lists/*
+
+   locale-gen en_US.UTF-8
+
+   wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+   dpkg -i cuda-keyring_1.1-1_all.deb
+   apt-get update
+   apt-get -y install cuda-12-1
+   
+ cd /tmp
+ wget https://developer.download.nvidia.com/compute/redist/cudnn/v8.8.0/local_installers/11.8/cudnn-local-repo-ubuntu2204-8.8.0.121_1.0-1_amd64.deb
+ 
+ apt install -f /tmp/cudnn-local-repo-ubuntu2204-8.8.0.121_1.0-1_amd64.deb -y 
+
+ apt install python-is-python3 -y
+
+ wget https://github.com/applied-systems-biology/jipipe/releases/download/pom-jipipe-5.3.0/JIPipe-5.3.0-Prepackaged-Linux64.tar.gz
+ tar -xvf JIPipe-5.3.0-Prepackaged-Linux64.tar.gz
+
+
+

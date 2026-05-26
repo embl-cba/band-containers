@@ -1,0 +1,69 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+
+%runscript
+ exec  /opt/conda/envs/tissuumaps_env/bin/"$@"
+
+%environment
+    CONDA_BIN_PATH="/opt/conda/bin"
+    export PATH="$CONDA_BIN_PATH:$PATH"
+
+%post
+   apt-get update -y
+
+DEBIAN_FRONTEND=noninteractive   apt-get install -y build-essential \
+         pkg-config \
+         libglib2.0-dev \
+         libexpat1-dev \
+         libvips \
+         libasound2
+
+   
+DEBIAN_FRONTEND=noninteractive  apt install -y wget \
+      libgl1-mesa-glx \
+      cmake \
+      pkg-config \
+      mesa-utils libglu1-mesa-dev \
+      freeglut3-dev mesa-common-dev \
+      libglew-dev libglfw3-dev libglm-dev \
+      libao-dev libmpg123-dev \
+      openssh-client \
+      git \
+      libxinerama-dev \
+      libxcursor-dev \
+      libxi-dev \
+      unzip \
+      libegl1-mesa \
+      libxv1 \
+      libxtst6 \
+      libxkbcommon-dev  \
+      libxkbfile-dev \
+      libxcb-cursor0 \
+      libxcb-shape0-dev \
+      libxcb-keysyms1-dev \
+      libxcb-icccm4-dev \
+      libxkbcommon-x11-dev \
+
+
+   cd /tmp 
+   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
+    && rm -f Miniconda3-latest-Linux-x86_64.sh 
+
+
+   export PATH="/opt/conda/bin:$PATH"
+   conda create -y -n tissuumaps_env -c conda-forge python=3.9 libvips
+   /opt/conda/envs/tissuumaps_env/bin/pip install "TissUUmaps[full]"
+   conda install -n tissuumaps_env -y libffi==3.4.2 -c conda-forge
+
+  cd /tmp
+
+    wget https://sourceforge.net/projects/virtualgl/files/3.0/virtualgl_3.0_amd64.deb/download -O virtualgl_3.0_amd64.deb
+    dpkg -i virtualgl*_amd64.deb
+    vglserver_config -config +s +f -t
+    apt update
+    apt -y upgrade 
+
+   
+

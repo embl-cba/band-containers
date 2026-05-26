@@ -1,0 +1,65 @@
+BootStrap: docker
+From: ubuntu:22.04
+
+
+%startscript
+%runscript
+
+%post
+  apt update -y && apt upgrade -y
+
+  DEBIAN_FRONTEND=noninteractive apt install -y wget \
+            ffmpeg \
+            build-essential \
+            libglvnd-dev \
+            libegl1-mesa-dev \
+            libgles2-mesa-dev \
+            libglu1-mesa-dev \
+            libgl1 \
+            libegl1 \
+            libegl1-mesa \
+            libglu1 \
+            mesa-utils \
+            libglvnd0 \
+            libglx0 \
+            libgles2 \
+            libxv1 \
+            libxcb1 \
+            libxext6 \
+            libxtst6 \
+            libxrandr-dev \
+            xdg-utils \
+            libasound2 \
+            libffi7 \
+            libfftw3-single3 \
+            libgdk-pixbuf-2.0-0 \
+            libgfortran5 \
+            libgstreamer-plugins-base1.0-0 \
+            libnspr4 \
+            libnss3 \
+            libopenjp2-7 \
+            libosmesa6 \
+            libpulse-mainloop-glib0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-render-util0 \
+            libxcb-util1 \
+            libxcb-xinerama0 \
+            libxkbcommon-x11-0 
+
+
+  cd /tmp
+  wget https://git.embl.de/ysun/abcdesktop-apps/-/raw/main/chimerax/ucsf-chimerax_1.5ubuntu22.04_amd64.deb  
+
+  DEBIAN_FRONTEND=noninteractive apt install -y /tmp/ucsf-chimerax_1.5ubuntu22.04_amd64.deb
+
+  rm /tmp/ucsf-chimerax_1.5ubuntu22.04_amd64.deb
+
+    wget https://sourceforge.net/projects/virtualgl/files/3.0/virtualgl_3.0_amd64.deb/download -O virtualgl_3.0_amd64.deb
+    dpkg -i virtualgl*_amd64.deb
+    vglserver_config -config +s +f -t
+    apt update
+    apt -y upgrade 
+
+#strip --remove-section=.note.ABI-tag libQt6Core.so.6 

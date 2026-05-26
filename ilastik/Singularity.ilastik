@@ -1,0 +1,24 @@
+BootStrap: docker
+From: ubuntu:18.04
+IncludeCmd: yes
+
+
+%runscript
+ /opt/ilastik/run_ilastik.sh
+
+
+%post
+
+ apt -y update
+
+ apt install -y wget \
+         tar \
+         libglu1-mesa-dev \
+         qt5-default \
+         libgl1-mesa-glx
+
+ mkdir /opt/ilastik
+ 
+ wget https://files.ilastik.org/ilastik-1.3.3post2-Linux.tar.bz2 -P /opt/ilastik
+
+ tar -xf /opt/ilastik/ilastik-1.*-Linux.tar.bz2 -C /opt/ilastik --strip-components=1
