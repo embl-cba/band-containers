@@ -1,0 +1,33 @@
+Bootstrap: docker
+From: continuumio/miniconda3
+
+%files
+    
+
+%runscript
+ exec  /opt/conda/envs/microsam/bin/"$@"
+
+%environment
+    CONDA_BIN_PATH="/opt/conda/bin"
+    export PATH="$CONDA_BIN_PATH:$PATH"
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/conda/envs/microsam/lib/
+
+
+%post
+   DEBIAN_FRONTEND=noninteractive apt-get update -y
+
+   DEBIAN_FRONTEND=noninteractive apt install -y build-essential \
+         libglu1-mesa-dev \
+         qtcreator \
+         libgl1-mesa-glx \
+         nautilus \
+         xdg-utils
+
+   export PATH="/opt/conda/bin:$PATH"
+   conda install -n base mamba -c conda-forge
+   mamba create -y -n microsam -c conda-forge python=3.10
+
+   
+   . /opt/conda/etc/profile.d/conda.sh
+   conda activate microsam
+   mamba install napari pooch python-elf>=0.4.8 pytorch==2.0.1 pytorch-cuda=11.7 segment-anything torchvision==0.15.2 torch_em>=0.6.0 tqdm pyqt timm imagecodecs python-xxhash -c pytorch -c nvidia -c conda-forge

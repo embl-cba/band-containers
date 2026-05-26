@@ -1,0 +1,33 @@
+BootStrap: docker
+From: ubuntu:20.04
+
+%runscript 
+  /opt/panoply/PanoplyJ/panoply.sh
+
+%startscript
+
+%post
+
+  # Get dependencies
+  apt-get -y update
+ export DEBIAN_FRONTEND=noninteractive 
+  apt-get install -y --no-install-recommends \
+    wget \
+    curl \
+    tar \
+    gcc \
+    git \
+    vim \
+    unzip \
+    libssl-dev \
+    ca-certificates \
+    openjdk-11-jdk
+
+  mkdir /opt/panoply
+
+  cd /opt/panoply/
+
+  wget https://www.giss.nasa.gov/tools/panoply/download/PanoplyJ-5.2.8.zip
+  unzip PanoplyJ-*.zip
+
+  chmod +x /opt/panoply/PanoplyJ/panoply.sh

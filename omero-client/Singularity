@@ -1,0 +1,23 @@
+BootStrap: docker
+From: ubuntu:20.04
+
+
+%startscript
+
+%runscript
+/opt/omero-client/OMERO.insight-5.7.2/bin/omero-insight
+
+
+%post
+  DEBIAN_FRONTEND=noninteractive apt update -y
+
+  DEBIAN_FRONTEND=noninteractive apt install -y wget git unzip openjdk-11-jdk
+
+
+  cd /opt
+  mkdir /opt/omero-client
+  cd /opt/omero-client
+  wget https://github.com/ome/omero-insight/releases/download/v5.7.2/OMERO.insight-5.7.2.zip
+
+  unzip OMERO*.zip 
+

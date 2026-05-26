@@ -1,0 +1,93 @@
+BootStrap: docker
+From: ubuntu:16.04
+
+%runscript
+    service postgresql start
+    service tomcat7 start
+
+%startscript
+    service postgresql start &&
+    service tomcat7 start
+
+%files
+    setenv.sh /opt
+    xnat-conf.properties /opt
+    gradle.properties /opt
+
+%labels
+    xnat server instance
+
+%environment
+    export DEBIAN_FRONTEND=noninteractive
+    export DEBCONF_NONINTERACTIVE_SEEN=true
+    export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
+
+
+%post
+    apt-get -y update
+    apt-get -y install --no-install-recommends \
+        openjdk-8-jdk \
+        git \
+        curl \
+        wget \
+        ca-certificates \
+        vim \
+        gnupg2 \
+        lsb-core
+
+
+    sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+
+    wget -q --no-check-certificate https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
+
+    apt-get -y update --allow-insecure-repositories
+
+    TZ=Europe/Berlin
+    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+    apt -y update && apt -y install tzdata
+    apt-get -y install postgresql-9.6 postgresql-contrib-9.6
+
+    service postgresql start
+
+    su - postgres -c "createuser -D xnat"
+    su - postgres -c "createdb -O xnat xnat"
+    su - postgres -c "psql -c \"alter user xnat with password 'xnat'\""
+
+    apt-get -y install tomcat7
+
+    chmod +x /opt/setenv.sh
+    mv /opt/setenv.sh /usr/share/tomcat7/bin
+
+    adduser xnat
+
+    usermod -aG xnat xnat
+    usermod -aG tomcat7 xnat
+
+    chown -RH --dereference xnat.xnat /var/lib/tomcat7
+    chown --no-dereference xnat.xnat /var/lib/tomcat7/*
+
+    rm -rf /var/lib/tomcat7/webapps/ROOT
+
+    mkdir -p /data/xnat/home
+    cd /data/xnat/
+    mkdir archive build cache ftp pipeline prearchive 
+    cd /data/xnat/home
+    mkdir config logs plugins work 
+    mv /opt/xnat-conf.properties /data/xnat/home/config
+
+    chown -R xnat.xnat /data/xnat
+    
+    cd /tmp
+    curl -L -o xnat-web.war https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-1.7.6.war
+
+    mv /tmp/xnat-web.war /var/lib/tomcat7/webapps
+
+    cd /data/xnat/pipeline
+
+    git clone --branch 1.7.6 https://www.github.com/nrgXnat/xnat-pipeline-engine.git
+
+    mv /opt/gradle.properties /data/xnat/pipeline/xnat-pipeline-engine
+
+    cd /data/xnat/pipeline/xnat-pipeline-engine
+    ./gradlew
+

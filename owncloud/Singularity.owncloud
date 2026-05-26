@@ -1,0 +1,25 @@
+BootStrap: docker
+From: debian:bullseye
+
+%runscript
+   owncloud "$@"
+   
+%startscript
+
+%post
+
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get -y update && apt upgrade -y
+    apt-get -y install wget gnupg gnupg2 build-essential
+    
+    wget -nv https://download.owncloud.com/desktop/ownCloud/stable/latest/linux/Debian_11/Release.key -O - | gpg --dearmor |tee /etc/apt/trusted.gpg.d/owncloud.gpg > /dev/null
+
+   apt update -y
+   apt install apt-transport-https -y
+   echo 'deb https://download.owncloud.com/desktop/ownCloud/stable/latest/linux/Debian_11/ /' |tee -a /etc/apt/sources.list.d/owncloud.list 
+
+  apt update -y
+
+  apt install owncloud-client -y
+strip --remove-section=.note.ABI-tag /opt/ownCloud/qt-5.15.2/lib/x86_64-linux-gnu/libQt5Core.so.5
+

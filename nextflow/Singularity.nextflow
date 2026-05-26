@@ -1,0 +1,24 @@
+BootStrap: docker
+From: ubuntu:18.04
+
+%environment
+  
+
+%runscript
+  /opt/nextflow/ "$@"
+
+%post
+   apt -y update
+
+   apt install -y unzip wget build-essential git software-properties-common
+   apt install -y openjdk-8-jdk
+
+   mkdir /opt/nextflow
+   cd /opt/nextflow
+   
+
+   wget -qO- https://get.nextflow.io | bash
+
+   echo 'export PATH=/opt/nextflow:$PATH' >> $SINGULARITY_ENVIRONMENT
+
+  

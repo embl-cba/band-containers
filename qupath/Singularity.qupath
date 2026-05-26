@@ -1,0 +1,33 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+%post
+    apt-get update && apt-get install -y \
+        openjdk-17-jdk \
+        libgtk-3-0 \
+        libopenblas-dev \
+        wget \
+        unzip \
+        libgl1 \
+        libxi6 \
+        libxtst6 \
+        libxrender1 \
+        libcanberra-gtk-module \
+        libcanberra-gtk3-module \
+        libx11-6 \
+        xz-utils
+
+    # Install QuPath
+    mkdir -p /opt/qupath
+    cd /opt/qupath
+    wget https://github.com/qupath/qupath/releases/download/v0.6.0/QuPath-v0.6.0-Linux.tar.xz
+    tar -xf QuPath-v0.6.0-Linux.tar.xz
+    rm QuPath-v0.6.0-Linux.tar.xz
+
+%environment
+    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    export PATH=$JAVA_HOME/bin:$PATH
+
+%runscript
+    exec /opt/qupath/QuPath/bin/QuPath "$@"
+

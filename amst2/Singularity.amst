@@ -1,0 +1,38 @@
+Bootstrap: docker
+From: continuumio/miniconda3
+
+%files
+    
+
+%runscript
+
+%environment
+    CONDA_BIN_PATH="/opt/conda/bin"
+    export PATH="$CONDA_BIN_PATH:$PATH"
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/conda/envs/amst2-env/lib/
+
+
+%post
+   DEBIAN_FRONTEND=noninteractive apt-get update -y
+
+   DEBIAN_FRONTEND=noninteractive apt install -y build-essential \
+         libglu1-mesa-dev \
+         libgl1-mesa-glx \
+         xdg-utils
+
+   export PATH="/opt/conda/bin:$PATH"
+
+   mkdir -p /opt/amst2
+   cd /opt/amst2
+   git clone https://github.com/jhennies/squirrel
+   git clone https://github.com/jhennies/AMST2
+   
+   conda install -n base mamba -c conda-forge
+   mamba create -y -n amst2-env -c conda-forge -c bioconda python=3.11 snakemake=8
+
+   . /opt/conda/etc/profile.d/conda.sh
+   /opt/conda/envs/amst2-env/bin/pip install -e squirrel
+   /opt/conda/envs/amst2-env/bin/pip install -e AMST2
+   /opt/conda/envs/amst2-env/bin/pip install SimpleITK-SimpleElastix
+   /opt/conda/envs/amst2-env/bin/pip install transforms3d
+

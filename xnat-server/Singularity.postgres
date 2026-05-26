@@ -1,0 +1,39 @@
+BootStrap: docker
+From: ubuntu:18.04
+
+%startscript
+  service postgresql start
+
+$labels
+  Postgresql9.6 instance
+
+%environment
+    export DEBIAN_FRONTEND=noninteractive
+    export DEBCONF_NONINTERACTIVE_SEEN=true
+%post
+
+  apt-get update
+  apt-get install -y --no-install-recommends \
+     wget \
+     ca-certificates \
+     vim \
+     gnupg2 \
+     lsb-core
+
+  sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+
+  wget -q --no-check-certificate https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add - 
+
+  apt-get -y update --allow-insecure-repositories
+
+  TZ=Europe/Berlin
+  ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+  apt -y update && apt -y install tzdata
+  apt-get -y install postgresql-9.6 postgresql-contrib-9.6
+
+  service postgresql start
+
+  su - postgres -c "createuser -D xnat"
+  su - postgres -c "createdb -O xnat xnat"
+  su - postgres -c "psql -c \"alter user xnat with password 'xnat'\""
+

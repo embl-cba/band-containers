@@ -1,0 +1,38 @@
+BootStrap: docker
+From: ubuntu:16.04
+IncludeCmd: yes
+
+%startscript
+  exec cellprofiler "$@"
+
+%runscript
+  exec cellprofiler "$@"
+
+%files
+
+%environment
+    export PATH=/usr/local/src/CellProfiler:$PATH
+    export LC_ALL=C
+
+%post
+    apt-get update
+    apt-get install -y wget libwebkitgtk-3.0-dev unzip software-properties-common
+    add-apt-repository ppa:deadsnakes/ppa
+    apt-get update
+    apt-get -y upgrade
+
+    apt-get install -y python3.8-dev python3.8-distutils python3-pip openjdk-8-jdk-headless libmysqlclient-dev libnotify-dev libsdl2-dev
+
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+    apt remove -y python3-pip
+    
+    apt install -y curl
+    curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+    python3.8 get-pip.py
+    
+    python3.8 -m pip install numpy
+
+    wget https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04/wxPython-4.1.0-cp38-cp38-linux_x86_64.whl
+    python3.8 -m pip3 install wxPython-4.1.0-cp38-cp38-linux_x86_64.whl
+    python3.8 -m pip3 install cellprofiler==4.1.3
+

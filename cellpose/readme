@@ -1,0 +1,5 @@
+docker built -t cellpose .
+
+docker run -v ~/test:/cellpose cellpose --dir /cellpose --pretrained_model cyto --save_png
+
+"test" folder contains the 3 test images.

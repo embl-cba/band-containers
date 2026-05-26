@@ -1,0 +1,47 @@
+BootStrap: docker
+From: abcdesktopio/oc.template.ubuntu.22.04:3.2
+
+
+%startscript
+ /usr/bin/rstudio --no-sandbox
+
+%runscript
+  exec /usr/bin/rstudio --no-sandbox
+
+%files
+
+%environment
+  export LANG en_US.UTF-8
+  export LANGUAGE en_US:en
+  export LC_ALL en_US.UTF-8
+  export DEBIAN_FRONTEND=noninteractive
+
+%post
+  apt update -y 
+  apt install -y libasound2-dev apt-utils apt-transport-https software-properties-common wget gnupg2 nvidia-cuda-toolkit gnome-terminal r-base r-base-core r-recommended r-base-dev libgsl-dev gsfonts libnss3 qtbase5-dev qt5-qmake libcurl4-openssl-dev libxml2-dev libmagick++-dev git libgdal-dev libgeos-dev libprotobuf-dev libprotoc-dev libudunits2-dev libjq-dev libssl-dev openjdk-11-jdk libfftw3-dev libgmp3-dev libgit2-dev libssh-dev libharfbuzz-dev libfribidi-dev qml-module-qtquick-controls default-jre default-jdk python3-venv python3-pip locales
+    
+
+
+ apt-get install ghostscript -y  
+
+ cd /tmp
+ wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo gpg --dearmor -o /usr/share/keyrings/r-project.gpg 
+ 
+ echo "deb [signed-by=/usr/share/keyrings/r-project.gpg] https://cloud.r-project.org/bin/linux/ubuntu jammy-cran40/" | tee -a /etc/apt/sources.list.d/r-project.list
+ apt update -y
+
+ wget https://download1.rstudio.org/electron/jammy/amd64/rstudio-2024.04.0-735-amd64.deb
+ apt-get update -y
+ apt-get install -y /tmp/rstudio-*.deb 
+
+ locale-gen en_US.UTF-8
+
+ pip install nvidia-cudnn-cu11==8.6.0.163
+
+ R CMD javareconf
+ R -e "install.packages(c('rJava','devtools'))"
+
+ chmod 4755 /usr/lib/rstudio/chrome-sandbox
+
+
+
