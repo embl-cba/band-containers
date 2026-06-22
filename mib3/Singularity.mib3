@@ -1,0 +1,69 @@
+BootStrap: docker
+FROM: containers.mathworks.com/matlab-runtime:r2026a-full
+IncludeCmd: yes
+
+
+%environment
+    export PATH=/opt/miniforge3/envs/sam4mib/bin:/opt/miniforge3/bin:${PATH}
+
+%runscript
+    /opt/mib3/run_MIB.sh "${MCR_ROOT}" "$@"
+
+%post
+    MATLAB_RELEASE=R2026a
+    MCR_ROOT=/opt/matlabruntime/${MATLAB_RELEASE}
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get -y update 
+    apt-get install -y --no-install-recommends \
+        wget \
+        tar \
+        curl \
+        ca-certificates \
+ 	unzip \
+	git \
+	bzip2 
+    rm -rf /var/lib/apt/lists/*
+
+    # ----- install mib -----
+    MIB_DIST_URL="" 
+    mkdir -p /opt/mib3
+    cd /tmp
+    wget -O mib3.zip "${MIB_DIST_URL}"
+    unzip -q mib3.zip -d /opt/mib3
+
+    if [ ! -f /opt/mib3/run_MIB.sh ]; then
+        inner="$(dirname "$(find /opt/mib3 -name run_MIB.sh | head -n1)")"
+        [ -n "${inner}" ] && mv "${inner}"/* /opt/mib3/
+    fi
+    chmod +x /opt/mib3/run_MIB.sh
+    rm -f /tmp/mib3.zip
+
+    # ----- miniforge and sam4mib environment ----
+    wget -O /tmp/miniforge.sh \
+        https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+    bash /tmp/Miniforge3-Linux-x86_64.sh -b -p /opt/miniforge3
+    rm -f /tmp/Miniforge*.sh
+    . /opt/miniforge3/etc/profile.d/conda.sh
+
+    conda create -y -n sam4mib python=3.11
+    /opt/miniforge3/envs/sam4mib/bin/pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121
+
+    cd /opt 
+    git clone https://github.com/Ajaxels/segment-anything-2.git && cd /opt/segment-anything-2
+    /opt/miniforge3/envs/sam4mib/bin/pip install -e .
+
+    SAM2_DIR=/opt/miniforge3/envs/sam4mib/lib/python3.11/site-packages/sam2
+    mkdir ${SAM2_DIR}
+    cp -r /opt/segment-anything-2/sam2/* "${SAM2_DIR/}" 2>/dev/null || true
+    cp -r "${SAM2_DIR}/configs/sam2.1_training/*" "${SAM2_DIR}/" 2>/dev/null || true
+    cp -r "${SAM2_DIR}/configs/sam2.1/*"          "${SAM2_DIR}/" 2>/dev/null || true
+
+    # ----- GPU fix for MIB -----
+    sed -i '/export LD_LIBRARY_PATH/i LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/.singularity.d/libs;' \
+            /opt/mib3/run_MIB.sh
+
+
+    
+    
+    
