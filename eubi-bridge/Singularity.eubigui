@@ -1,0 +1,66 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+%arguments
+   EUBI_BRIDGE_VERSION=0.4.2
+
+%environment
+    export LANG=C.UTF-8
+    export PATH=/opt/conda/envs/eubizarr/bin:/opt/conda/bin:$PATH
+    export EUBI_CONFIG_DIR=$HOME/.eubi_bridge_apptainer
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update -y && apt-get install -y bzip2 \
+        wget \
+        ca-certificates \
+        curl \
+        build-essential \
+	libglu1-mesa-dev \
+	libgl1-mesa-glx \
+	nautilus \
+        xdg-utils \
+        konsole \
+        software-properties-common
+
+    apt-get install -y software-properties-common
+    add-apt-repository -y ppa:mozillateam/ppa
+    printf 'Package: firefox*\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001\n' \
+    > /etc/apt/preferences.d/mozilla-firefox
+    apt-get update && apt-get install -y firefox
+
+    cd /tmp
+    wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh 
+    bash Miniforge3-Linux-x86_64.sh -b -p /opt/conda 
+    rm -f Miniforge3-Linux-x86_64.sh 
+    export PATH=/opt/conda/bin:$PATH
+
+    conda create -y -n eubizarr -c conda-forge "openjdk=11.*" maven python=3.12 pyqt6=6.8.1
+    /opt/conda/envs/eubizarr/bin/pip install --no-cache-dir "eubi-bridge=={{EUBI_BRIDGE_VERSION}}"
+    conda clean -afy 
+
+
+%apprun gui
+    exec eubi-gui "$@"
+%appenv gui
+    export QT_X11_NO_MITSHM=1
+%apphelp gui
+    Launch GUI with: apptainer run --app gui eubi-bridge.sif   
+
+%apprun cli
+    exec eubi "$@"
+%apphelp cli
+    Example usage: apptainer run --app cli eubi-bridge.sif to_zarr intput output
+
+%runscript
+    if [ $# -eq 0 ]; then
+        exec /opt/eubi/start-eubi.sh
+    else
+        exec eubi "$@"
+    fi
+
+
+
+    
+
